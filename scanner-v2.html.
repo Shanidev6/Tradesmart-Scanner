@@ -1,0 +1,157 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TradeSmart Scanner V2</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f2f5f9;color:#172033;margin:0;padding:16px}
+main{max-width:520px;margin:auto}
+h1{font-size:25px}
+.card{background:white;padding:16px;border-radius:12px;margin:14px 0}
+label{display:block;font-weight:bold;margin-top:12px}
+input,select{box-sizing:border-box;width:100%;padding:12px;margin-top:6px;border:1px solid #bbc5d2;border-radius:8px;font-size:16px}
+button{width:100%;padding:14px;border:0;border-radius:8px;background:#174ea6;color:white;font-size:17px;font-weight:bold;margin-top:16px}
+.result{padding:14px;border-radius:8px;background:#edf1f5;margin-top:12px;line-height:1.7;overflow-wrap:anywhere}
+.small{font-size:13px;color:#596579;line-height:1.5}
+.buy{color:#08783e;font-weight:bold}.sell{color:#b42318;font-weight:bold}
+</style>
+</head>
+<body>
+<main>
+<h1>TradeSmart Scanner V2</h1>
+<p>Practice signals • Risk control • Paper trading</p>
+
+<div class="card">
+<strong>Important</strong>
+<p class="small">Practice calculator only. No live prices or verified market signals are connected. Enter current market information manually. Never treat this page as a live scanner.</p>
+</div>
+
+<div class="card">
+<h2>1. Market confirmation</h2>
+<label>Instrument</label>
+<select id="symbol">
+<option>Nifty 50</option>
+<option>Bank Nifty</option>
+<option>F&O Stock</option>
+<option>Other</option>
+</select>
+
+<label>Market condition</label>
+<select id="market">
+<option value="sideways">Sideways / Unclear</option>
+<option value="trending">Trending</option>
+</select>
+
+<label>Trade direction</label>
+<select id="direction">
+<option value="buy">BUY (Bullish)</option>
+<option value="sell">SELL (Bearish)</option>
+</select>
+
+<label>Trend confirmation</label>
+<select id="trend">
+<option value="no">Not confirmed</option>
+<option value="yes">Confirmed in trade direction</option>
+</select>
+
+<label>Breakout / breakdown candle closed beyond level?</label>
+<select id="break">
+<option value="no">No</option>
+<option value="yes">Yes</option>
+</select>
+
+<label>Retest / pullback confirmed?</label>
+<select id="retest">
+<option value="no">No</option>
+<option value="yes">Yes</option>
+</select>
+</div>
+
+<div class="card">
+<h2>2. Trade levels</h2>
+<label>Practice entry price (₹)</label>
+<input id="entry" type="number" min="0" step="any" placeholder="Enter entry price">
+
+<label>Stop-loss price (₹)</label>
+<input id="stop" type="number" min="0" step="any" placeholder="Enter stop-loss">
+
+<label>Risk limit per trade (₹)</label>
+<input id="risk" type="number" min="1" value="200" min="1">
+
+<label>Available capital (₹)</label>
+<input id="capital" type="number" min="1" value="40000">
+
+<button onclick="calculate()">CHECK PRACTICE SETUP</button>
+<div id="result" class="result" aria-live="polite">Enter your levels and confirmations to check a setup.</div>
+</div>
+
+<div class="card">
+<h2>3. Your rules</h2>
+<ul>
+<li>No trade in sideways markets.</li>
+<li>Require trend, candle-close and retest confirmation.</li>
+<li>Risk no more than your chosen rupee limit.</li>
+<li>Target uses a 1:2 risk-to-reward ratio.</li>
+<li>Quantity is rounded down to whole units.</li>
+<li>For F&O, use the actual lot size before placing any order.</li>
+</ul>
+<p class="small">Calculations exclude brokerage, taxes, slippage and gaps. Signals and prices are not independently verified.</p>
+</div>
+</main>
+
+<script>
+function calculate(){
+const g=id=>document.getElementById(id).value;
+const entry=Number(g("entry"));
+const stop=Number(g("stop"));
+const risk=Number(g("risk"));
+const capital=Number(g("capital"));
+const dir=g("direction");
+const out=document.getElementById("result");
+
+function noTrade(message){
+out.innerHTML="<strong>NO TRADE</strong><br>"+message;
+}
+
+if(g("market")!=="trending"){
+noTrade("Market is sideways or unclear. Wait for a confirmed trend.");
+return;
+}
+if(g("trend")!=="yes"||g("break")!=="yes"||g("retest")!=="yes"){
+noTrade("Trend, candle close and retest must all be confirmed.");
+return;
+}
+if(!Number.isFinite(entry)||!Number.isFinite(stop)||entry<=0||stop<=0||risk<=0||capital<=0){
+noTrade("Enter valid positive prices, capital and risk.");
+return;
+}
+const distance=dir==="buy"?entry-stop:stop-entry;
+if(distance<=0){
+noTrade("Stop-loss is on the wrong side of the entry.");
+return;
+}
+const target=dir==="buy"?entry+2*distance:entry-2*distance;
+const allowedRisk=Math.min(risk,capital*0.005);
+const quantity=Math.floor(Math.min(allowedRisk/distance,capital/entry));
+if(quantity<1){
+noTrade("One unit exceeds your risk or capital limit.");
+return;
+}
+const actualRisk=quantity*distance;
+const reward=quantity*2*distance;
+out.innerHTML=
+"<span class='"+(dir==="buy"?"buy":"sell")+"'>PRACTICE "+dir.toUpperCase()+" SETUP</span><br>"+
+"Instrument: "+g("symbol")+"<br>"+
+"Entry: ₹"+entry.toFixed(2)+"<br>"+
+"Stop-loss: ₹"+stop.toFixed(2)+"<br>"+
+"Target (1:2): ₹"+target.toFixed(2)+"<br>"+
+"Quantity estimate: "+quantity+" units<br>"+
+"Estimated risk: ₹"+actualRisk.toFixed(2)+"<br>"+
+"Potential reward: ₹"+reward.toFixed(2)+"<br><br>"+
+"<strong>Paper trading only.</strong> Prices and confirmations are user-entered, not live-verified.";
+}
+</script>
+</body>
+</html>
