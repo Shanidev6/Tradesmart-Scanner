@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TradeSmart AI — Dashboard Prototype</title>
+<style>
+:root{font-family:Arial,sans-serif;color:#172033;background:#f3f6fb}
+body{margin:0}header{background:#142b4a;color:white;padding:22px 16px}
+h1{margin:0 0 7px;font-size:26px}header p{margin:0;color:#d9e7fa}
+main{max-width:850px;margin:auto;padding:14px}
+.notice{background:#fff4d6;border:1px solid #f0d58a;padding:12px;border-radius:10px;line-height:1.45}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin:14px 0}
+.card{background:white;border:1px solid #e0e7f0;border-radius:12px;padding:14px;box-shadow:0 2px 5px #1227440a}
+.card h2{font-size:17px;margin:0 0 8px}.card p{font-size:14px;line-height:1.4;margin:0;color:#4a5870}
+label{display:block;font-weight:bold;margin:12px 0 5px}
+input,select{width:100%;box-sizing:border-box;padding:11px;border:1px solid #b9c6d8;border-radius:8px;font-size:16px;background:white}
+button{width:100%;border:0;border-radius:9px;background:#1769aa;color:white;padding:12px;font-size:16px;font-weight:bold;margin-top:12px}
+.result{margin-top:12px;background:#eaf4ff;border-radius:9px;padding:12px;line-height:1.5}
+footer{text-align:center;color:#66758b;padding:18px;font-size:12px}
+</style>
+</head>
+<body>
+<header><h1>TradeSmart AI</h1><p>One dashboard for markets, research and disciplined decisions</p></header>
+<main>
+<div class="notice"><strong>Prototype only:</strong> Live prices, verified signals, news feeds and alerts are not connected. Do not place trades based on this page. Never enter API keys or passwords here.</div>
+<div class="grid">
+<section class="card"><h2>🇮🇳 Indian Markets</h2><p>NSE stocks, F&O, Nifty and Bank Nifty. Planned: trend, support/resistance and confirmed setups.</p></section>
+<section class="card"><h2>₿ Crypto</h2><p>Bitcoin, Ethereum and supported coins. Planned: trend and volatility checks.</p></section>
+<section class="card"><h2>🥇 MCX Commodities</h2><p>Gold, silver and crude oil. Planned: contract-aware price and risk analysis.</p></section>
+<section class="card"><h2>🌎 COMEX</h2><p>International gold, silver and copper. Planned: global market context.</p></section>
+<section class="card"><h2>📈 Multibagger Research</h2><p>Research candidates using growth, debt, cash flow, valuation and business quality. No returns are guaranteed.</p></section>
+<section class="card"><h2>🛡️ Discipline Guard</h2><p>Skip unconfirmed setups, avoid chasing missed entries, and stop when daily risk limits are reached.</p></section>
+</div>
+<section class="card">
+<h2>Risk & Reward Practice Calculator</h2>
+<p>Enter example values to calculate a stop-loss distance, a 1:2 target, and an estimated quantity. This is a calculator, not a trading signal.</p>
+<label for="entry">Example entry price (₹)</label><input id="entry" type="number" min="0" step="0.01" value="100">
+<label for="stop">Example stop-loss price (₹)</label><input id="stop" type="number" min="0" step="0.01" value="98">
+<label for="capital">Capital available for this example (₹)</label><input id="capital" type="number" min="0" step="1" value="40000">
+<label for="risk">Maximum risk per trade (₹)</label><input id="risk" type="number" min="0" step="1" value="200">
+<button onclick="calc()">Calculate practice example</button>
+<div class="result" id="result" aria-live="polite">Enter example values, then tap Calculate.</div>
+</section>
+<section class="card" style="margin-top:12px">
+<h2>Trade decision rules</h2>
+<p><strong>CONFIRMED:</strong> only after all predefined checks pass. <strong>WAIT:</strong> setup is incomplete. <strong>NO TRADE:</strong> sideways conditions, poor reward-to-risk, missing data or daily risk limit reached.</p>
+</section>
+</main>
+<footer>TradeSmart AI • Early dashboard prototype • Market data not connected</footer>
+<script>
+function calc(){
+ const e=Number(document.getElementById('entry').value), s=Number(document.getElementById('stop').value),
+ cap=Number(document.getElementById('capital').value), risk=Number(document.getElementById('risk').value);
+ const out=document.getElementById('result');
+ if(!(e>0&&s>0&&cap>0&&risk>0)||e===s){out.textContent='Please enter positive values and make sure entry and stop-loss are different.';return;}
+ const dist=Math.abs(e-s), target=e+(e>s?2*dist:-2*dist), qty=Math.floor(Math.min(risk/dist,cap/e));
+ out.innerHTML='Stop distance: ₹'+dist.toFixed(2)+' per unit<br>Illustrative 1:2 target: ₹'+target.toFixed(2)+'<br>Estimated quantity by risk and capital: '+qty+' units<br>Estimated risk at that quantity: ₹'+(qty*dist).toFixed(2)+'<br><small>Does not include fees, slippage, lot sizes, margin or gap risk. For short trades, verify direction and contract rules separately.</small>';
+}
+</script>
+</body>
+</html>
